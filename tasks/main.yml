@@ -33,14 +33,14 @@
     when: import_key.changed
 
   - name: Install packages
-    yum: name={{ item }} state="{{ prometheus_rpm_package_state }}" update_cache=yes
-    with_items: "{{ prometheus_rpm_components }}"
+    yum: name="{{ item.key if item.value == '' else item.key + '-' + item.value }}" state="{{ prometheus_rpm_package_state }}" update_cache=yes
+    with_dict: "{{ prometheus_rpm_components }}"
     notify: systemctl daemon-reload
 
-  - name: Start service
-    service: name={{ item }} state=started enabled=yes
-    with_items: "{{ prometheus_rpm_components }}"
-    when: "item not in ['prometheus', 'prometheus2']"
+  - name: Start exporter services
+    service: name="{{ item.key }}" state=started enabled=yes
+    with_dict: "{{ prometheus_rpm_components }}"
+    when: "item.key not in ['prometheus', 'prometheus2']"
 
   - name: Start service
     service: name=prometheus state=started enabled=yes
@@ -49,92 +49,97 @@
 
   when: ansible_os_family == 'RedHat'
 
+- name: List of all packages/services
+  set_fact:
+    _prometheus_services: "{{ _prometheus_services }} + [ '{{ item.key }}' ]"
+  with_dict: "{{ prometheus_rpm_components }}"
+ 
 - name: Configure alertmanager
   template: src=etc/default/alertmanager.j2 dest=/etc/default/alertmanager owner=root group=root mode=0644
-  when: "'alertmanager' in prometheus_rpm_components and prometheus_rpm_alertmanager_opts is defined"
+  when: "'alertmanager' in _prometheus_services and prometheus_rpm_alertmanager_opts is defined"
   notify: restart alertmanager
 
 - name: Configure apache_exporter
   template: src=etc/default/apache_exporter.j2 dest=/etc/default/apache_exporter owner=root group=root mode=0644
-  when: "'apache_exporter' in prometheus_rpm_components and prometheus_rpm_apache_exporter_opts is defined"
+  when: "'apache_exporter' in _prometheus_services and prometheus_rpm_apache_exporter_opts is defined"
   notify: restart apache_exporter
 
 - name: Configure blackbox_exporter
   template: src=etc/default/blackbox_exporter.j2 dest=/etc/default/blackbox_exporter owner=root group=root mode=0644
-  when: "'blackbox_exporter' in prometheus_rpm_components and prometheus_rpm_blackbox_exporter_opts is defined"
+  when: "'blackbox_exporter' in _prometheus_services and prometheus_rpm_blackbox_exporter_opts is defined"
   notify: restart blackbox_exporter
 
 - name: Configure consul_exporter
   template: src=etc/default/consul_exporter.j2 dest=/etc/default/consul_exporter owner=root group=root mode=0644
-  when: "'consul_exporter' in prometheus_rpm_components and prometheus_rpm_consul_exporter_opts is defined"
+  when: "'consul_exporter' in _prometheus_services and prometheus_rpm_consul_exporter_opts is defined"
   notify: restart consul_exporter
 
 - name: Configure collectd_exporter
   template: src=etc/default/collectd_exporter.j2 dest=/etc/default/collectd_exporter owner=root group=root mode=0644
-  when: "'collectd_exporter' in prometheus_rpm_components and prometheus_rpm_collectd_exporter_opts is defined"
+  when: "'collectd_exporter' in _prometheus_services and prometheus_rpm_collectd_exporter_opts is defined"
   notify: restart collectd_exporter
 
 - name: Configure elasticsearch_exporter
   template: src=etc/default/elasticsearch_exporter.j2 dest=/etc/default/elasticsearch_exporter owner=root group=root mode=0644
-  when: "'elasticsearch_exporter' in prometheus_rpm_components and prometheus_rpm_elasticsearch_exporter_opts is defined"
+  when: "'elasticsearch_exporter' in _prometheus_services and prometheus_rpm_elasticsearch_exporter_opts is defined"
   notify: restart elasticsearch_exporter
 
 - name: Configure graphite_exporter
   template: src=etc/default/graphite_exporter.j2 dest=/etc/default/graphite_exporter owner=root group=root mode=0644
-  when: "'graphite_exporter' in prometheus_rpm_components and prometheus_rpm_graphite_exporter_opts is defined"
+  when: "'graphite_exporter' in _prometheus_services and prometheus_rpm_graphite_exporter_opts is defined"
   notify: restart graphite_exporter
 
 - name: Configure haproxy_exporter
   template: src=etc/default/haproxy_exporter.j2 dest=/etc/default/haproxy_exporter owner=root group=root mode=0644
-  when: "'haproxy_exporter' in prometheus_rpm_components and prometheus_rpm_haproxy_exporter_opts is defined"
+  when: "'haproxy_exporter' in _prometheus_services and prometheus_rpm_haproxy_exporter_opts is defined"
   notify: restart haproxy_exporter
 
 - name: Configure jmx_exporter
   template: src=etc/default/jmx_exporter.j2 dest=/etc/default/jmx_exporter owner=root group=root mode=0644
-  when: "'jmx_exporter' in prometheus_rpm_components and prometheus_rpm_jmx_exporter_opts is defined"
+  when: "'jmx_exporter' in _prometheus_services and prometheus_rpm_jmx_exporter_opts is defined"
   notify: restart jmx_exporter
 
 - name: Configure mysqld_exporter
   template: src=etc/default/mysqld_exporter.j2 dest=/etc/default/mysqld_exporter owner=root group=root mode=0644
-  when: "'mysqld_exporter' in prometheus_rpm_components and prometheus_rpm_mysqld_exporter_opts is defined"
+  when: "'mysqld_exporter' in _prometheus_services and prometheus_rpm_mysqld_exporter_opts is defined"
   notify: restart mysqld_exporter
 
 - name: Configure node_exporter
   template: src=etc/default/node_exporter.j2 dest=/etc/default/node_exporter owner=root group=root mode=0644
-  when: "'node_exporter' in prometheus_rpm_components and prometheus_rpm_node_exporter_opts is defined"
+  when: "'node_exporter' in _prometheus_services and prometheus_rpm_node_exporter_opts is defined"
   notify: restart node_exporter
 
 - name: Configure postgres_exporter
   template: src=etc/default/postgres_exporter.j2 dest=/etc/default/postgres_exporter owner=root group=root mode=0644
-  when: "'postgres_exporter' in prometheus_rpm_components and prometheus_rpm_postgres_exporter_opts is defined"
+  when: "'postgres_exporter' in _prometheus_services and prometheus_rpm_postgres_exporter_opts is defined"
   notify: restart postgres_exporter
 
 - name: Configure prometheus
   template: src=etc/default/prometheus.j2 dest=/etc/default/prometheus owner=root group=root mode=0644
-  when: "'prometheus' in prometheus_rpm_components and prometheus_rpm_prometheus_opts is defined"
+  when: "'prometheus' in _prometheus_services and prometheus_rpm_prometheus_opts is defined"
   notify: restart prometheus
 
 - name: Configure prometheus
   template: src=etc/default/prometheus.j2 dest=/etc/default/prometheus owner=root group=root mode=0644
-  when: "'prometheus2' in prometheus_rpm_components and prometheus_rpm_prometheus_opts is defined"
+  when: "'prometheus2' in _prometheus_services and prometheus_rpm_prometheus_opts is defined"
   notify: restart prometheus
 
 - name: Configure pushgateway
   template: src=etc/default/pushgateway.j2 dest=/etc/default/pushgateway owner=root group=root mode=0644
-  when: "'pushgateway' in prometheus_rpm_components and prometheus_rpm_pushgateway_opts is defined"
+  when: "'pushgateway' in _prometheus_services and prometheus_rpm_pushgateway_opts is defined"
   notify: restart pushgateway
 
 - name: Configure redis_exporter
   template: src=etc/default/redis_exporter.j2 dest=/etc/default/redis_exporter owner=root group=root mode=0644
-  when: "'redis_exporter' in prometheus_rpm_components and prometheus_rpm_redis_exporter_opts is defined"
+  when: "'redis_exporter' in _prometheus_services and prometheus_rpm_redis_exporter_opts is defined"
   notify: restart redis_exporter
 
 - name: Configure sachet
   template: src=etc/default/sachet.j2 dest=/etc/default/sachet owner=root group=root mode=0644
-  when: "'sachet' in prometheus_rpm_components and prometheus_rpm_sachet_opts is defined"
+  when: "'sachet' in _prometheus_services and prometheus_rpm_sachet_opts is defined"
   notify: restart sachet
 
 - name: Configure snmp_exporter
   template: src=etc/default/snmp_exporter.j2 dest=/etc/default/snmp_exporter owner=root group=root mode=0644
-  when: "'snmp_exporter' in prometheus_rpm_components and prometheus_rpm_snmp_exporter_opts is defined"
+  when: "'snmp_exporter' in _prometheus_services and prometheus_rpm_snmp_exporter_opts is defined"
   notify: restart snmp_exporter

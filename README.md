@@ -15,36 +15,37 @@ you will need to generate config files using a separate role.
 ## Role Variables
 
 By default, this role doesn't install anything. Set the `prometheus_rpm_components` to
-the list of components to install.
+the list of components to install. 
 
 For a server, it would be something like this:
 
 ``` yaml
 prometheus_rpm_components:
-  - alertmanager
-  - blackbox_exporter
-  # - prometheus # Prometheus 1.x
-  - prometheus2 # Prometheus 2.x
-  - sachet
+  # - PACKAGE_NAME: PACKAGE_VERSION   # Empty PACKAGE_VERSION defaults to latest available version in repo
+  - alertmanager: ''
+  - blackbox_exporter: ''
+  # - prometheus: ''       # Prometheus 1.x
+  - prometheus2: '2.3.0'   # Prometheus 2.x
+  - sachet: ''
 ```
 
 Exporters are:
 
 ``` yaml
 prometheus_rpm_components:
-  - apache_exporter
-  - collectd_exporter
-  - consul_exporter
-  - elasticsearch_exporter
-  - graphite_exporter
-  - haproxy_exporter
-  - jmx_exporter
-  - mysqld_exporter
-  - node_exporter
-  - postgres_exporter
-  - pushgateway
-  - redis_exporter
-  - snmp_exporter
+  - apache_exporter: ''
+  - collectd_exporter: ''
+  - consul_exporter: ''
+  - elasticsearch_exporter: ''
+  - graphite_exporter: ''
+  - haproxy_exporter: ''
+  - jmx_exporter: ''
+  - mysqld_exporter: ''
+  - node_exporter: '0.14.0'
+  - postgres_exporter: ''
+  - pushgateway: ''
+  - redis_exporter: ''
+  - snmp_exporter: ''
 ```
 
 You can set variables to configure the command line options, and they will override the options

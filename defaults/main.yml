@@ -1,30 +1,31 @@
 ---
-# Compoenents to install
+# Compoenents to install - None by default
 prometheus_rpm_components: []
 
 # Server components
 # prometheus_rpm_components:
-#   - alertmanager
-#   - blackbox_exporter
-#   - prometheus # Prometheus 1.x
-#   - prometheus2 # Prometheus 2.x
-#   - sachet
+#   - alertmanager: ''
+#   - blackbox_exporter: ''
+#   - prometheus: '' # Prometheus 1.x
+#   - prometheus2: '' # Prometheus 2.x
+#   - sachet: ''
 
 # Exporters
 # prometheus_rpm_components:
-#   - apache_exporter
-#   - collectd_exporter
-#   - consul_exporter
-#   - elasticsearch_exporter
-#   - graphite_exporter
-#   - haproxy_exporter
-#   - jmx_exporter
-#   - mysqld_exporter
-#   - node_exporter
-#   - postgres_exporter
-#   - pushgateway
-#   - redis_exporter
-#   - snmp_exporter
+#   - PACKAGE_NAME: PACKAGE_VERSION (empty PACKAGE_VERSION defaults to latest available in repo)
+#   - apache_exporter: ''
+#   - collectd_exporter: ''
+#   - consul_exporter: ''
+#   - elasticsearch_exporter: ''
+#   - graphite_exporter: ''
+#   - haproxy_exporter: ''
+#   - jmx_exporter: ''
+#   - mysqld_exporter: ''
+#   - node_exporter: '0.14.0'
+#   - postgres_exporter: ''
+#   - pushgateway: ''
+#   - redis_exporter: ''
+#   - snmp_exporter: ''
 
 prometheus_rpm_package_state: present
 # prometheus_rpm_package_state: latest
@@ -56,3 +57,6 @@ prometheus_rpm_package_state: present
 # prometheus_rpm_pushgateway_opts: ""
 # prometheus_rpm_redis_exporter_opts: ""
 # prometheus_rpm_snmp_exporter_opts: ""
+
+# Internal var
+_prometheus_services: []
